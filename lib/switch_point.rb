@@ -1,4 +1,3 @@
-require 'active_support/lazy_load_hooks'
 require 'switch_point/config'
 require 'switch_point/version'
 
@@ -57,18 +56,19 @@ module SwitchPoint
     end
   end
   extend ClassMethods
-end
 
-ActiveSupport.on_load(:active_record) do
-  require 'switch_point/connection'
-  require 'switch_point/model'
-  require 'switch_point/query_cache'
+  def self.rails_initializer
+    require 'switch_point/connection'
+    require 'switch_point/model'
+    require 'switch_point/query_cache'
 
-  ActiveRecord::Base.send(:include, SwitchPoint::Model)
-  ActiveRecord::ConnectionAdapters::AbstractAdapter.class_eval do
-    include SwitchPoint::Connection
-    SwitchPoint::Connection::DESTRUCTIVE_METHODS.each do |method_name|
-      alias_method_chain method_name, :switch_point
+    ActiveRecord::Base.send(:include, SwitchPoint::Model)
+    ActiveRecord::ConnectionAdapters::AbstractAdapter.class_eval do
+      include SwitchPoint::Connection
+      SwitchPoint::Connection::DESTRUCTIVE_METHODS.each do |method_name|
+        alias_method_chain method_name, :switch_point
+      end
     end
   end
 end
+

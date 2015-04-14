@@ -130,13 +130,15 @@ module SwitchPoint
         with_writable do
           model_for_connection
         end
-      else
-        ActiveRecord::Base
       end
     end
 
     def connection
-      model_for_connection.connection
+      if model_for_connection
+        model_for_connection.connection
+      else
+        ActiveRecord::Base.retrieve_connection
+      end
     end
 
     def connected?
